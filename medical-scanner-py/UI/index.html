@@ -1,0 +1,537 @@
+<html>
+
+<head>
+    <title>
+        Medical Stock Management System
+    </title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Data Table CSS and JS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+
+    <!-- Self JS -->
+    <script src="includes\js\medical.js"></script>
+
+    <!-- self css -->
+    <link rel="stylesheet" href="includes/css/medical.css">
+</head>
+
+<script>
+    $(document).ready(function () {
+        console.log(localStorage.getItem('isLogin'));
+        if (localStorage.getItem('isLogin') == null || localStorage.getItem('isLogin') == 'false') {
+            location.href = 'login.html';
+        } else {
+            //fetch data of dashboard table
+            fetchFranchiseTableData();
+        }
+
+        var isLogin = localStorage.getItem('isLogin');
+        var username = localStorage.getItem('username');
+        if (isLogin) {
+
+            $('.notLoggedIn').css('display', 'none');
+            $('.loggedIn').css('display', 'visible');
+            $('.username').html(username);
+        } else {
+            $('.loggedIn').css('display', 'none');
+            $('.notLoggedIn').css('display', 'visible');
+        }
+    });
+
+
+</script>
+
+<body>
+    <div class="container-fluid">
+
+        <!-- NAVBAR -->
+
+        <div class="row">
+
+            <nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top">
+                <!-- Brand -->
+                <a class="navbar-brand" href="index.html">Medical Scanner</a>
+
+                <!-- Toggler/collapsibe Button -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navbar links -->
+                <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="index.html">Dashboard <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="billing.html">Billing</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+
+                        <li class="nav-item notLoggedIn">
+                            <a class="nav-link" href="login.html">Login</a>
+                        </li>
+                        <li class="nav-item notLoggedIn">
+                            <a class="nav-link" href="register.html">Register</a>
+                        </li>
+
+                        <li class="nav-item loggedIn">
+                            <a class="nav-link username" href=""></a>
+                        </li>
+                        <li class="nav-item loggedIn">
+                            <a class="nav-link" href="logout.html">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <br><br><br>
+
+
+
+
+        <!-- PRODUCT TABLE  -->
+
+
+        <div class="row">
+
+            <div class="col-sm-12 px-5 py-0">
+                <span class="font-weight-bold h3">All Medicines</span>
+                <div class="float-right">
+                    <button id="btn-add" class="btn btn-primary " data-toggle="modal" data-target="#newMedicine">New
+                        Medicine</button>
+                    <button id="btn-edit" class="btn btn-success" data-toggle="modal">Edit</button>
+                    <button id="btn-delete" class="btn btn-danger " data-toggle="modal">Delete</button>
+                </div>
+            </div>
+            <div class="col-sm-12  px-5 py-3">
+
+                <table id="dashboardTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Sr No.</th>
+                            <th>Product Id</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Rate</th>
+                            <th>Contents</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dash-table">
+
+                    </tbody>
+
+                </table>
+                <div id="result"></div>
+            </div>
+        </div>
+
+
+        <!-- The Modal -->
+        <div class="modal fade" id="newMedicine">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add New Medicine</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <!-- Modal body -->
+
+                    <div class="global-container">
+                        <div class="card col-sm col-10">
+                            <div class="card-body">
+                                <form id="med-form">
+                                    <div class="form-group ">
+                                        <div class="col-8">
+                                            <input type="number" class="form-control" id="id" hidden>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-4" for="content">Name </label>
+                                        <div class="col-8">
+                                            <input type="text" class="form-control" id="name" name="name"
+                                                placeholder="Enter name">
+                                            <span class="error text-danger nameError">&nbsp; </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-4" for="content">Available quantity </label>
+                                        <div class="col-8">
+                                            <input type="number" class="form-control" id="available_quantity"
+                                                name="content" placeholder="Enter available quantity">
+                                            <span class="error text-danger available_quantityError">&nbsp;
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-4" for="content">Rate </label>
+                                        <div class="col-8">
+                                            <input type="number" class="form-control" id="rate" name="rate"
+                                                placeholder="Enter rate in INR">
+                                            <span class="error text-danger rateError">&nbsp; </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-4" for="content">content </label>
+                                        <div class="col-12">
+                                            <textarea type="textarea" class="form-control" id="content" name="content"
+                                                placeholder="Enter content"></textarea>
+                                            <span class="error text-danger contentwordError">&nbsp;
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-4" for="content">Type </label>
+                                        <div class="col-8">
+                                            <select type="text" class="form-control" id="type" name="type"
+                                                placeholder="Enter Type">
+                                                <option value="t">Tablet</option>
+                                                <option value="c">Capsule</option>
+                                                <option value="s">Syrup</option>
+                                                <option value="i">Injectible</option>
+                                            </select>
+                                            <span class="error text-danger typeError">&nbsp;
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="reset" onclick="clearFormFields()" class="btn btn-danger">Clear</button>
+                        <button type="button" onclick="submit()" class="btn btn-primary">Submit</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- DELETE CONFIRMATION MODAL -->
+        <div class="modal fade" id="delete-med-confirmation">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="global-container">
+                        <div class="card col-sm col-10">
+                            <div class="card-body">
+                                <label class="col" for="content">Do you realy want to delete this medicine</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button id="btn-cancel" type="reset" class="btn btn-secondary">Cancel</button>
+                        <button id="btn-delete-confirm" type="button" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--  message MODAL -->
+        <div class="modal fade" id="message-modal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="global-container">
+                        <div class="card col-sm col-10">
+                            <div class="card-body message-body">
+                                <b> <label id="message" for="content"></label></b>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button id="btn-ok" type="button" class="btn btn-success px-4">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- FOOTER  -->
+        <div class="row">
+            <div class="col-sm-12 text-center">
+                <span>Medical Stock Management system</span>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        /**
+         * Choose the action for update or new entry .
+         */
+        function submit() {
+            var id = $('#id').val();
+            if (id) {
+                updateMedicine();
+            } else {
+                addMedicine();
+            }
+        }
+
+        /**
+         * Adde medicine .
+         */
+        function addMedicine() {
+            console.log("INSIDE ADD MEDICINE");
+            var message = "";
+            var name = $('#name').val();
+            var available_quantity = $('#available_quantity').val();
+            var content = $('#content').val();
+            var rate = $('#rate').val();
+            var type = $('#type').val();
+
+            var jwtToken = localStorage.getItem('jwtToken');
+            var error = false;
+
+            if (name.length == 0) {
+                console.log("name red");
+                $('#name').css('border-color', 'red');
+                $('.nameError').html("Medicine name required ");
+                error = true;
+            } else {
+                console.log("name green");
+                $('#name').css('border-color', 'green');
+                $('.nameError').html("");
+                error = false;
+            }
+
+
+
+            if (isNaN(available_quantity)) {
+                $('#available_quantity').css('border-color', 'red');
+                $('.available_quantityError').html("Quantity must be a number");
+                error = true;
+            } else {
+                $('#available_quantity').css('border-color', 'green');
+                $('.available_quantityError').html("");
+                error = false;
+            }
+
+
+
+            if (content.length > 500) {
+                $('#content').css('border-color', 'red');
+                $('.contentwordError').html("Content is too large");
+                error = true;
+            } else {
+                $('#content').css('border-color', 'green');
+                $('.contentwordError').html("");
+                error = false;
+            }
+
+            if (rate > 100000) {
+                $('#rate').css('border-color', 'red');
+                $('.rateError').html("Rate must be smaller than 1 lack");
+                error = true;
+            } else {
+                $('#rate').css('border-color', 'green');
+                $('.rateError').html("");
+                error = false;
+            }
+
+            if (!error) {
+                console.log(name,
+                    available_quantity,
+                    content,
+                    rate,
+                    type);
+                $.ajax({
+                    url: "http://localhost:8000/item",
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        name: name,
+                        available_quantity: available_quantity,
+                        content: content,
+                        rate: rate,
+                        type: type
+                    }),
+                    success: function (data) {
+                        console.log(data);
+                        console.log("INSIDE ADD MEDICINE ");
+                        if (data.status == 200) {
+                            $('#newMedicine').hide();
+                            $('#message-modal').modal('toggle');
+                            $('#message').html(data.message);
+                            $('#btn-ok').click(function () {
+                                location.href = 'index.html';
+                            });
+                            //save jwt token to local storage
+                        } else if (data.status == 404) {
+                            $('.nameError').html(data.message);
+                        } else {
+                            if (data.status == 201) {
+                                $('#newMedicine').hide();
+                                $('#message-modal').modal('toggle');
+                                $('#message').html(data.message);
+                                $('#btn-ok').click(function () {
+                                    location.href = 'index.html';
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+
+        /**
+           * Update medicine .
+           */
+        function updateMedicine() {
+            console.log("INSIDE UPDATE MEDICINE");
+            var id = $('#id').val();
+            var name = $('#name').val();
+            var available_quantity = $('#available_quantity').val();
+            var content = $('#content').val();
+            var rate = $('#rate').val();
+            var type = $('#type').val();
+
+            var jwtToken = localStorage.getItem('jwtToken');
+            var error = false;
+
+            if (name.length == 0) {
+                console.log("name red");
+                $('#name').css('border-color', 'red');
+                $('.nameError').html("Medicine name required ");
+                error = true;
+            } else {
+                console.log("name green");
+                $('#name').css('border-color', 'green');
+                $('.nameError').html("");
+                error = false;
+            }
+
+
+
+            if (isNaN(available_quantity)) {
+                $('#available_quantity').css('border-color', 'red');
+                $('.available_quantityError').html("Quantity must be a number");
+                error = true;
+            } else {
+                $('#available_quantity').css('border-color', 'green');
+                $('.available_quantityError').html("");
+                error = false;
+            }
+
+
+
+            if (content.length > 500) {
+                $('#content').css('border-color', 'red');
+                $('.contentwordError').html("Content is too large");
+                error = true;
+            } else {
+                $('#content').css('border-color', 'green');
+                $('.contentwordError').html("");
+                error = false;
+            }
+
+            if (rate > 100000) {
+                $('#rate').css('border-color', 'red');
+                $('.rateError').html("Rate must be smaller than 1 lack");
+                error = true;
+            } else {
+                $('#rate').css('border-color', 'green');
+                $('.rateError').html("");
+                error = false;
+            }
+
+            if (!error) {
+                console.log(name,
+                    available_quantity,
+                    content,
+                    rate,
+                    type);
+                $.ajax({
+                    url: "http://localhost:8000/item",
+                    type: 'PUT',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        id: id,
+                        name: name,
+                        available_quantity: available_quantity,
+                        content: content,
+                        rate: rate,
+                        type: type
+                    }),
+                    success: function (data) {
+                        console.log(data);
+                        console.log("INSIDE ADD MEDICINE ");
+                        if (data.status == 200) {
+                            $('#newMedicine').hide();
+                            $('#message-modal').modal('toggle');
+                            $('#message').html(data.message);
+                            $('#btn-ok').click(function () {
+                                location.href = 'index.html';
+                            });
+                        } else if (data.status == 404) {
+                            $('.nameError').html(data.message);
+                        } else {
+                            if (data.status == 201) {
+                                $('#newMedicine').hide();
+                                $('#message-modal').modal('toggle');
+                                $('#message').html(data.message);
+                                $('#btn-ok').click(function () {
+                                    location.href = 'index.html';
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function clearFormFields() {
+            $('#id').val(null);
+            $('#name').val(null);
+            $('#available_quantity').val(null);
+            $('#content').val(null);
+            $('#rate').val(null);
+            $('#type').val(null);
+        }
+    </script>
+</body>
+
+</html>
